@@ -1,0 +1,302 @@
+--create all tables
+declare 
+    tcnt number;
+begin 
+--create table UserType
+ select count(*) into tcnt from user_tables where table_name='COOKBOOK_USERTYPE';
+ if(tcnt<=0) then 
+    EXECUTE IMMEDIATE 'create table cookbook_usertype ( 
+    TypeID number,
+    TypeName varchar2(50),
+    constraint pk_usertype primary key(TypeID)
+    )';
+ end if;
+ --create table cookbook_user
+select count(*) into tcnt from user_tables where table_name='COOKBOOK_USER';
+ if(tcnt<=0) then 
+    EXECUTE IMMEDIATE 'create table cookbook_user ( 
+    UserID number generated always as identity,
+    UserName varchar2(50),
+    TypeID number default 1,
+    DateTime timestamp default systimestamp, 
+    constraint pk_user primary key(UserID),
+    constraint fk_usertype foreign key(TypeID) references COOKBOOK_USERTYPE(typeID) on delete set null 
+    )';
+ end if;
+ --create table ingredient
+select count(*) into tcnt from user_tables where table_name='COOKBOOK_INGREDIENT';
+ if(tcnt<=0) then 
+    EXECUTE IMMEDIATE 'create table cookbook_ingredient ( 
+    IngredientID number generated always as identity,
+    IngredientName varchar2(20),
+    Location varchar(50),
+    constraint pk_ingredient primary key(IngredientID)
+    )';
+ end if;
+ --create table ReceiptDetails
+ select count(*) into tcnt from user_tables where table_name='COOKBOOK_DETAILS';
+ if(tcnt<=0) then 
+    EXECUTE IMMEDIATE 'create table cookbook_details ( 
+    DetailsID number generated always as identity,
+    ReceiptID number,
+    IngredientID number,
+    Quantity number,
+    Desrc varchar(50),
+    constraint pk_detials primary key(DetailsID),
+    constraint fk_ingredient foreign key(IngredientID) references cookbook_ingredient(IngredientID) on delete cascade
+    )';
+ end if;
+ --create table Receipt
+ select count(*) into tcnt from user_tables where table_name='COOKBOOK_RECEIPT';
+ if(tcnt<=0) then 
+    EXECUTE IMMEDIATE 'create table cookbook_receipt ( 
+    ReceiptID number generated always as identity,
+    ReceiptName varchar2(50) not null,
+    PublisherID number not null,--userid
+    DateTime timestamp default systimestamp, 
+    Desrc varchar(50),
+    constraint pk_receipt primary key(ReceiptID),
+    constraint fk_user foreign key(PublisherID) references cookbook_user(UserID) on delete cascade
+    )';
+ end if;
+ 
+ --create table cookbook_post
+ select count(*) into tcnt from user_tables where table_name='COOKBOOK_POST';
+ if(tcnt<=0) then 
+    EXECUTE IMMEDIATE 'create table cookbook_post ( 
+    PostID number generated always as identity,
+    UserID number not null,
+    Content varchar2(50),
+    Likes number,
+    Location varchar2(50),
+    DateTime timestamp default systimestamp, 
+    Desrc varchar2(20),
+    constraint pk_post primary key(PostID),
+    constraint fk_user_post foreign key(UserID) references COOKBOOK_USER(UserID) on delete cascade
+    )';
+ end if;
+ --create table cookbook_comment
+ select count(*) into tcnt from user_tables where table_name='COOKBOOK_COMMENT';
+ if(tcnt<=0) then 
+    EXECUTE IMMEDIATE 'create table cookbook_comment ( 
+    CommentID number generated always as identity,
+    UserID number not null,
+    PostID number not null,
+    Content varchar2(50),
+    Likes number,
+    Location varchar2(50),
+    DateTime timestamp default systimestamp, 
+    Desrc varchar2(20),
+    constraint pk_comment primary key(CommentID),
+    constraint fk_user_comment foreign key(UserID) references cookbook_user(UserID) on delete cascade,
+    constraint fk_post_comment foreign key(PostID) references cookbook_post(PostID) on delete cascade
+    )';
+ end if;
+ --create table cookbook_favorite
+ select count(*) into tcnt from user_tables where table_name='COOKBOOK_FAVORITE';
+ if(tcnt<=0) then 
+    EXECUTE IMMEDIATE 'create table cookbook_favorite ( 
+    FavoriteID number generated always as identity,
+    UserID number not null,
+    PostID number,
+    CommentID number,
+    ReceiptID number,
+    DateTime timestamp default systimestamp, 
+    Desrc varchar2(20),
+    constraint pk_favorite primary key(FavoriteID),
+    constraint fk_user_favorite foreign key(UserID) references cookbook_user(UserID) on delete cascade,
+    constraint fk_post_favorite foreign key(PostID) references cookbook_post(PostID) on delete cascade,
+    constraint fk_comment_favorite foreign key(CommentID) references cookbook_comment(CommentID) on delete cascade,
+    constraint fk_receipt_favorite foreign key(ReceiptID) references cookbook_receipt(ReceiptID) on delete cascade
+    )';
+ end if;
+end;
+/
+
+-------------------------------------------------------------------------------------------------------------------
+
+--drop all tales
+declare 
+  tcnt number;
+begin
+ --drop table COOKBOOK_FAVORITE
+ select count(*) into tcnt from user_tables where table_name='COOKBOOK_FAVORITE';
+  if(tcnt>0) then 
+    EXECUTE IMMEDIATE 'drop table COOKBOOK_FAVORITE';
+ end if;
+ --drop table cookbook_comment
+ select count(*) into tcnt from user_tables where table_name='COOKBOOK_COMMENT';
+  if(tcnt>0) then 
+    EXECUTE IMMEDIATE 'drop table COOKBOOK_COMMENT';
+ end if;
+ --drop table COOKBOOK_POST
+ select count(*) into tcnt from user_tables where table_name='COOKBOOK_POST';
+  if(tcnt>0) then 
+    EXECUTE IMMEDIATE 'drop table COOKBOOK_POST';
+ end if;
+ --drop table COOKBOOK_RECEIPT
+ select count(*) into tcnt from user_tables where table_name='COOKBOOK_RECEIPT';
+  if(tcnt>0) then 
+    EXECUTE IMMEDIATE 'drop table COOKBOOK_RECEIPT';
+ end if;
+  --drop table COOKBOOK_DETAILS
+ select count(*) into tcnt from user_tables where table_name='COOKBOOK_DETAILS';
+ if(tcnt>0) then 
+    EXECUTE IMMEDIATE 'drop table COOKBOOK_DETAILS';
+ end if;
+  --drop table COOKBOOK_INGREDIENT
+ select count(*) into tcnt from user_tables where table_name='COOKBOOK_INGREDIENT';
+ if(tcnt>0) then 
+    EXECUTE IMMEDIATE 'drop table COOKBOOK_INGREDIENT';
+ end if;
+  --drop table COOKBOOK_USER
+ select count(*) into tcnt from user_tables where table_name='COOKBOOK_USER';
+ if(tcnt>0) then 
+    EXECUTE IMMEDIATE 'drop table COOKBOOK_USER';
+ end if;
+  --drop table COOKBOOK_USERTYPE
+ select count(*) into tcnt from user_tables where table_name='COOKBOOK_USERTYPE';
+ if(tcnt>0) then 
+    EXECUTE IMMEDIATE 'drop table COOKBOOK_USERTYPE';
+ end if;
+end;
+/
+
+-------------------------------------------------------------------------------------------------------------------
+--insert all tables
+
+--insert all sample date
+--insert usertype
+declare
+    utypes number;
+begin
+select count(*) into utypes from cookbook_usertype;
+if (utypes <=0) then
+    insert into cookbook_usertype (typename,typeid) values('Regular',1);
+    insert into cookbook_usertype (typename,typeid) values('Publisher',2);
+    insert into cookbook_usertype (typename,typeid) values('Admin',3);
+end if;
+
+--insert user
+--regular
+insert into cookbook_user (username) values('Smith');
+insert into cookbook_user (username) values('Allen');
+insert into cookbook_user (username) values('Scott');
+insert into cookbook_user (username) values('Allen');
+insert into cookbook_user (username) values('King');
+--publisher
+insert into cookbook_user (username,typeid) values('Black','2');
+insert into cookbook_user (username,typeid) values('Adward','2');
+--admin
+insert into cookbook_user (username,typeid) values('James',3);
+
+--insert into ingredient
+    insert into cookbook_ingredient(ingredientname,location) values('genger','BOS');
+    insert into cookbook_ingredient(ingredientname,location) values('garlic','Aus');
+    insert into cookbook_ingredient(ingredientname,location) values('red pepper','LA');
+    insert into cookbook_ingredient(ingredientname,location) values('green pepper','NY');
+    insert into cookbook_ingredient(ingredientname,location) values('beef','BOS');
+    insert into cookbook_ingredient(ingredientname,location) values('pork','NY');
+
+--insert into receipt
+insert into cookbook_receipt (receiptname,PublisherID,desrc) values ('BBQ Beef',6,'sweet');
+insert into cookbook_receipt (receiptname,PublisherID,desrc) values ('BBQ Lamb',6,'hot');
+insert into cookbook_receipt (receiptname,PublisherID,desrc) values ('BBQ Pork',6,'salt');
+insert into cookbook_receipt (receiptname,PublisherID,desrc) values ('Beef Soup',7,'sweet');
+insert into cookbook_receipt (receiptname,PublisherID,desrc) values ('Lamb Soup',7,'salt');
+insert into cookbook_receipt (receiptname,PublisherID,desrc) values ('Pork Cake',7,'hot');
+
+--insert into receipt_details
+insert into cookbook_details (receiptid,ingredientid,Quantity,desrc) values(3,2,50,'boil');
+insert into cookbook_details (receiptid,ingredientid,Quantity,desrc) values(3,3,100,'grill');
+insert into cookbook_details (receiptid,ingredientid,Quantity,desrc) values(3,4,150,'grill');
+insert into cookbook_details (receiptid,ingredientid,Quantity,desrc) values(4,2,20,'boil');
+insert into cookbook_details (receiptid,ingredientid,Quantity,desrc) values(4,3,40,'fire');
+insert into cookbook_details (receiptid,ingredientid,Quantity,desrc) values(4,4,60,'fire');
+
+--insert post 
+insert into cookbook_post (userID,content,likes,location,desrc) values('2','I love Austin',0,'Austin','public');
+insert into cookbook_post (userID,content,likes,location,desrc) values('2','I am not happy',2,'Austin','private');
+insert into cookbook_post (userID,content,likes,location,desrc) values('3','I love Boston',111,'Boston','private');
+insert into cookbook_post (userID,content,likes,location,desrc) values('4','I love Dallas',2,'Dallas','public');
+insert into cookbook_post (userID,content,likes,location,desrc) values('2','I love ER diagram',123,'Austin','private');
+insert into cookbook_post (userID,content,likes,location,desrc) values('2','I love Database',5,'Austin','public');
+insert into cookbook_post (userID,content,likes,location,desrc) values('8','I Love New York',7,'New York','private');
+insert into cookbook_post (userID,content,likes,location,desrc) values('8','I want to learn Database',8,'New York','public');
+
+--insert comment
+insert into cookbook_comment (userID,postID,content,likes,location,desrc) values('3','1','I love there too',11111,'Paris','public');
+insert into cookbook_comment (userID,postID,content,likes,location,desrc) values('4','1','I love there too',1,'London','public');
+insert into cookbook_comment (userID,postID,content,likes,location,desrc) values('5','1','I love there too',0,'China','public');
+insert into cookbook_comment (userID,postID,content,likes,location,desrc) values('6','1','I love there too',5,'Boston','public');
+insert into cookbook_comment (userID,postID,content,likes,location,desrc) values('5','2','Cry Cry',11000,'Malden','public');
+insert into cookbook_comment (userID,postID,content,likes,location,desrc) values('6','2','I am Happy',58888,'Malden','public');
+insert into cookbook_comment (userID,postID,content,likes,location,desrc) values('7','2','I love your post',13,'England','public');
+insert into cookbook_comment (userID,postID,content,likes,location,desrc) values('8','2','me too',0,'Africa','public');
+
+--insert favorite
+    insert into cookbook_favorite (userID,postID,commentID,receiptID,desrc) values(3,2,null,null,'favorite post');
+    insert into cookbook_favorite (userID,postID,commentID,receiptID,desrc) values(3,null,2,null,'favorite comment');
+    insert into cookbook_favorite (userID,postID,commentID,receiptID,desrc) values(3,null,null,5,'favorite receipt');
+    insert into cookbook_favorite (userID,postID,commentID,receiptID,desrc) values(4,4,null,null,'favorite post');
+    insert into cookbook_favorite (userID,postID,commentID,receiptID,desrc) values(5,null,3,null,'favorite comment');
+    insert into cookbook_favorite (userID,postID,commentID,receiptID,desrc) values(6,null,null,5,'favorite receipt');
+    insert into cookbook_favorite (userID,postID,commentID,receiptID,desrc) values(4,5,null,null,'favorite post');
+    insert into cookbook_favorite (userID,postID,commentID,receiptID,desrc) values(5,null,5,null,'favorite comment');
+    insert into cookbook_favorite (userID,postID,commentID,receiptID,desrc) values(6,2,null,4,'favorite receipt');
+    insert into cookbook_favorite (userID,postID,commentID,receiptID,desrc) values(3,2,null,null,'favorite post');
+end;
+/
+-------------------------------------------------------------------------------------------------------------------
+--SQLs
+--view usertype
+select * from cookbook_usertype;
+--view users
+select * from cookbook_user;
+--view usertype and user
+select * from cookbook_user join cookbook_usertype on cookbook_usertype.typeid = cookbook_user.typeid;
+--view ingredient
+select * from cookbook_ingredient;
+--view receipt
+select * from cookbook_receipt;
+--view details
+select * from cookbook_details;
+--view receipt details of receiptid = 4
+select * from cookbook_details join cookbook_ingredient on cookbook_ingredient.ingredientid = cookbook_details.ingredientid
+where receiptid=4;
+--view receipt with detail and ingredients
+select a.receiptid,a.receiptname,a.publisherid,d.username,b.ingredientid,c.ingredientname,b.quantity,b.desrc from cookbook_receipt a ,cookbook_details b ,cookbook_ingredient c, cookbook_user d
+where a.receiptid=b.receiptid and b.ingredientid=c.ingredientid and a.publisherid=d.userid
+order by a.receiptid,b.ingredientid;
+--view post
+select * from cookbook_post;
+--view comment
+select * from cookbook_comment;
+--view favorite
+select * from cookbook_favorite;
+--view all the  comments of post2
+select * from cookbook_comment where postid='2';
+--view comment detail
+select c.postid,u.userid,u.username,c.content,c.likes,c.location,c.datetime from cookbook_comment c, cookbook_user u
+where c.userid=u.userid
+order by c.postid;
+--view all the favorite of user 3
+select * from cookbook_favorite where userid=3;
+
+--view all the favorite posts
+select fa.favoriteid,u.username,p.postid,p.content,p.likes,p.location,p.datetime posttime,fa.datetime favoritetime from cookbook_favorite fa, cookbook_user u,cookbook_post p
+where fa.userid=u.userid and fa.postid is not null and fa.postid=p.postid
+order by fa.userid;
+
+--view all the favorite comments
+select fa.favoriteid,u.username,c.postid Comment_post,c.content,c.likes,c.location,c.datetime commenttime,fa.datetime favoritetime from cookbook_favorite fa, cookbook_user u,cookbook_comment c
+where fa.userid=u.userid and fa.commentid is not null and fa.commentid=c.commentid
+order by c.postid;
+
+--view all the favorite receipts
+select fa.favoriteid,r.receiptid ,u.username,r.receiptname,r.datetime publishtime,fa.datetime favoritetime from cookbook_favorite fa, cookbook_user u,cookbook_receipt r
+where fa.userid=u.userid and fa.receiptid is not null and fa.receiptid=r.receiptid
+order by r.receiptid,u.username;
+
+
+select * from user_tables;
