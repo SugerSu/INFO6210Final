@@ -1,0 +1,85 @@
+----------------------------------------------------- create views----------------------------------------------------------------
+Create or replace view v_user_detials as
+select u.username name, t.typename type, u.datetime registerdate
+from cookbook_user u join cookbook_usertype t 
+on u.typeid = t.typeid;
+
+create or replace view v_receipt_details as
+select a.receiptid id,a.receiptname name,a.publisherid publisher_id,d.username 	publisher_name,b.ingredientid ingredient_id,c.ingredientname 	ingredient_name,b.quantity,b.desrc 
+from cookbook_receipt a ,cookbook_details b ,cookbook_ingredient c, cookbook_user d
+where a.receiptid=b.receiptid and b.ingredientid=c.ingredientid and a.publisherid=d.userid;
+
+create or replace view v_comment_detials as
+select c.postid,u.userid,u.username,c.content,c.likes,c.location,c.datetime 
+from cookbook_comment c, cookbook_user u
+where c.userid=u.userid
+order by c.postid;
+
+create or replace view v_favorite_posts as
+select fa.favoriteid,u.username,p.postid,p.content,p.likes,p.location,p.datetime 	posttime,fa.datetime favoritetime from cookbook_favorite fa, cookbook_user 	u,cookbook_post p
+where fa.userid=u.userid and fa.postid is not null and fa.postid=p.postid
+order by fa.userid;
+
+create or replace view v_favorite_comment as
+select fa.favoriteid,u.username,c.postid Comment_post,c.content,c.likes,c.location,c.datetime 	commenttime,fa.datetime favoritetime from cookbook_favorite fa, cookbook_user 	u,cookbook_comment c
+where fa.userid=u.userid and fa.commentid is not null and fa.commentid=c.commentid
+order by c.postid;
+
+create or replace view v_favorite_receipt as
+select fa.favoriteid,r.receiptid ,u.username,r.receiptname,r.datetime publishtime,fa.datetime favoritetime 
+from cookbook_favorite fa, cookbook_user u,cookbook_receipt r
+where fa.userid=u.userid and fa.receiptid is not null and fa.receiptid=r.receiptid
+order by r.receiptid,u.username;
+
+----------------------------------------------------- View Data----------------------------------------------------------------
+--view usertype
+select * from cookbook_usertype;
+--view users
+select * from cookbook_user;
+--view usertype and user
+select * from cookbook_user join cookbook_usertype on cookbook_usertype.typeid = cookbook_user.typeid;
+--view ingredient
+select * from cookbook_ingredient;
+--view receipt
+select * from cookbook_receipt;
+--view details
+select * from cookbook_details;
+--view receipt details of receiptid = 4
+select * from cookbook_details join cookbook_ingredient on cookbook_ingredient.ingredientid = cookbook_details.ingredientid
+where receiptid=4;
+--view receipt with detail and ingredients
+select a.receiptid,a.receiptname,a.publisherid,d.username,b.ingredientid,c.ingredientname,b.quantity,b.desrc from cookbook_receipt a ,cookbook_details b ,cookbook_ingredient c, cookbook_user d
+where a.receiptid=b.receiptid and b.ingredientid=c.ingredientid and a.publisherid=d.userid
+order by a.receiptid,b.ingredientid;
+--view post
+select * from cookbook_post;
+--view comment
+select * from cookbook_comment;
+--view favorite
+select * from cookbook_favorite;
+--view all the  comments of post2
+select * from cookbook_comment where postid='2';
+--view comment detail
+select c.postid,u.userid,u.username,c.content,c.likes,c.location,c.datetime from cookbook_comment c, cookbook_user u
+where c.userid=u.userid
+order by c.postid;
+--view all the favorite of user 3
+select * from cookbook_favorite where userid=3;
+
+--view all the favorite posts
+select fa.favoriteid,u.username,p.postid,p.content,p.likes,p.location,p.datetime posttime,fa.datetime favoritetime from cookbook_favorite fa, cookbook_user u,cookbook_post p
+where fa.userid=u.userid and fa.postid is not null and fa.postid=p.postid
+order by fa.userid;
+
+--view all the favorite comments
+select fa.favoriteid,u.username,c.postid Comment_post,c.content,c.likes,c.location,c.datetime commenttime,fa.datetime favoritetime from cookbook_favorite fa, cookbook_user u,cookbook_comment c
+where fa.userid=u.userid and fa.commentid is not null and fa.commentid=c.commentid
+order by c.postid;
+
+--view all the favorite receipts
+select fa.favoriteid,r.receiptid ,u.username,r.receiptname,r.datetime publishtime,fa.datetime favoritetime from cookbook_favorite fa, cookbook_user u,cookbook_receipt r
+where fa.userid=u.userid and fa.receiptid is not null and fa.receiptid=r.receiptid
+order by r.receiptid,u.username;
+
+
+select * from user_tables;
