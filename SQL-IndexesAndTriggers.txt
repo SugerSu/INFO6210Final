@@ -1,0 +1,35 @@
+-------------------------------------------------Indexes-------------------------------------------------
+create index username_idx on cookbook_user (upper(username)); 
+
+select * from cookbook_user where upper(username) like 'A%';
+
+select  upper(username) from cookbook_user  where upper(username) like upper('%al%');
+
+
+create index receipt_name_idx on cookbook_receipt (upper(receiptname)); 
+
+select * from cookbook_receipt where upper(receiptname) like '%BBQ%';
+
+
+
+create index ingredient_name_idx on cookbook_ingredient (upper(ingredientname));
+
+select * from cookbook_ingredient where upper(ingredientname) like upper('%beef%');
+
+
+create index ingredient_location_idx on cookbook_ingredient (upper(location));
+
+select * from cookbook_ingredient where upper(location) like upper('%bo%');
+
+-------------------------------------------------Triggers-------------------------------------------------
+
+create or replace trigger update_usertypeid_trigger 
+after
+delete
+on cookbook_usertype
+begin
+    update cookbook_user set typeid=1 where typeid is null;
+end;
+/
+
+
