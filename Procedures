@@ -1,0 +1,156 @@
+
+----------------------------------------Insert into user type table: before insert check type id and username----------------------------------------
+
+create or replace procedure insert_usertype_proc(
+id in cookbook_usertype.typeid%type,
+name in cookbook_usertype.typename%type,
+rescode out number
+) as
+cnt number :=0;
+begin
+select count(*) into cnt from cookbook_usertype where typeid=id or typename=name;
+if cnt>0 then
+    DBMS_OUTPUT.PUT_LINE('Faild:id/name exist!');
+    rescode:=-1;
+else 
+    DBMS_OUTPUT.PUT_LINE('success');
+    insert into cookbook_usertype values(id,name);
+    rescode:=1;
+end if;
+end insert_usertype_proc;
+/
+
+-------------------------------Delete user type:----------------------------------------
+
+create or replace procedure delete_usertype_proc(
+name in cookbook_usertype.typename%type
+) as
+begin
+delete from cookbook_usertype where typename=name;
+end delete_usertype_proc;
+/
+
+exec delete_usertype_proc('SuperAdmin');
+
+----------------------------------------insert into favorite table----------------------------------------
+
+CREATE OR REPLACE PROCEDURE insert_favorite_proc (
+    uid   IN   cookbook_favorite.userid%TYPE,
+    pid   IN   cookbook_favorite.postid%TYPE,
+    cid   IN   cookbook_favorite.commentid%TYPE,
+    rid   IN   cookbook_favorite.receiptid%TYPE
+) AS
+    cnt NUMBER;
+    input_exception EXCEPTION;
+    PRAGMA exception_init ( input_exception, -32767 );
+BEGIN
+    IF uid IS NULL THEN
+        dbms_output.put_line('Failed: UserID is be null.');
+        RAISE input_exception;
+    END IF;
+    IF pid IS NULL AND cid IS NULL AND rid IS NULL THEN
+        dbms_output.put_line('Failed: nothing favorited.');
+        RAISE input_exception;
+    END IF;
+
+    IF pid IS NOT NULL THEN--favorite post
+        SELECT
+            COUNT(*)
+        INTO cnt
+        FROM
+            cookbook_favorite
+        WHERE
+            userid = userid
+            AND postid = pid;
+
+        IF cnt > 0 THEN
+            dbms_output.put_line('sucess: post favorited+' || cnt);
+        ELSE
+            INSERT INTO cookbook_favorite (
+                userid,
+                postid,
+                commentid,
+                receiptid,
+                desrc
+            ) VALUES (
+                uid,
+                pid,
+                NULL,
+                NULL,
+                'favorite post'
+            );
+
+            dbms_output.put_line('sucess: new post favorited');
+        END IF;
+
+    END IF;
+
+    IF cid IS NOT NULL THEN--facorite comment
+        SELECT
+            COUNT(*)
+        INTO cnt
+        FROM
+            cookbook_favorite
+        WHERE
+            userid = userid
+            AND commentid = cid;
+
+        IF cnt > 0 THEN
+            dbms_output.put_line('sucess: comment favorited+' || cnt);
+        ELSE
+            INSERT INTO cookbook_favorite (
+                userid,
+                postid,
+                commentid,
+                receiptid,
+                desrc
+            ) VALUES (
+                uid,
+                NULL,
+                cid,
+                NULL,
+                'favorite comment'
+            );
+
+            dbms_output.put_line('sucess: new comment favorited');
+        END IF;
+
+    END IF;
+
+    IF rid IS NOT NULL THEN --favorite receipt
+        SELECT
+            COUNT(*)
+        INTO cnt
+        FROM
+            cookbook_favorite
+        WHERE
+            userid = userid
+            AND receiptid = rid;
+
+        IF cnt > 0 THEN
+            dbms_output.put_line('sucess: receipt favorited+' || cnt);
+        ELSE
+            INSERT INTO cookbook_favorite (
+                userid,
+                postid,
+                commentid,
+                receiptid,
+                desrc
+            ) VALUES (
+                uid,
+                NULL,
+                NULL,
+                rid,
+                'favorite comment'
+            );
+
+            dbms_output.put_line('sucess: new receipt favorited');
+        END IF;
+
+    END IF;
+
+EXCEPTION
+    WHEN input_exception THEN
+        RAISE;
+END insert_favorite_proc;
+/
